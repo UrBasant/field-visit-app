@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>Field Visit Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #273449;
+    --border: #334155;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --green: #10b981;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --radius: 14px;
+    --radius-sm: 9px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { font-size: 16px; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* HEADER */
+  .app-header { background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 60%); padding: 20px 20px 0; position: relative; overflow: hidden; }
+  .app-header::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%); border-radius: 50%; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text3); font-weight: 400; }
+  .header-date { font-size: 12px; color: var(--text3); text-align: right; }
+  .header-date strong { display: block; color: var(--text2); font-size: 13px; }
+  .gps-status { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .gps-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text3); }
+  .gps-dot.green { background: var(--green); }
+  .gps-dot.amber { background: var(--amber); animation: pulse 1.2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* STEPS BAR */
+  .steps-bar { display: flex; gap: 4px; padding: 16px 0 20px; }
+  .step-seg { flex: 1; height: 3px; background: var(--border); border-radius: 2px; transition: background 0.35s; }
+  .step-seg.done { background: var(--accent); }
+  .step-seg.active { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .step-label { text-align: center; padding: 0 20px 16px; font-size: 13px; color: var(--text3); }
+  .step-label strong { color: var(--accent2); font-weight: 600; }
+
+  /* CONTENT */
+  .content { padding: 0 16px 100px; max-width: 600px; margin: 0 auto; }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+  .section-title .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  /* FIELDS */
+  .field { margin-bottom: 14px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+  label .req { color: var(--red); margin-left: 2px; }
+  label .opt { color: var(--text3); font-weight: 400; margin-left: 4px; font-size: 11px; }
+  input[type="text"], input[type="email"], input[type="tel"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; padding: 12px 14px; border-radius: var(--radius-sm);
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s; -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+  input.error, select.error, textarea.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; cursor: pointer; }
+  select option { background: var(--surface2); }
+  textarea { resize: none; min-height: 80px; line-height: 1.5; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .err-msg { font-size: 11px; color: var(--red); margin-top: 4px; display: none; }
+  .err-msg.show { display: block; }
+  .helper-text { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* PILLS - SINGLE */
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill-option { display: none; }
+  .pill-label { display: inline-flex; align-items: center; padding: 8px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.2s; background: var(--surface2); user-select: none; }
+  .pill-option:checked + .pill-label { background: rgba(59,130,246,0.15); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+  /* PILLS - MULTI */
+  .multi-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .multi-pill { display: inline-flex; align-items: center; padding: 8px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.2s; background: var(--surface2); user-select: none; }
+  .multi-pill.selected { background: rgba(59,130,246,0.15); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+
+  /* CURRENCY */
+  .currency-wrap { position: relative; }
+  .currency-wrap::before { content: '₹'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; z-index: 1; }
+  .currency-wrap input { padding-left: 28px; }
+
+  /* CONDITIONAL SECTIONS */
+  .cond-section { display: none; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
+  .cond-section.show { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* PHOTO */
+  .photo-upload { border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 20px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden; }
+  .photo-upload:hover { border-color: var(--accent); background: rgba(59,130,246,0.04); }
+  .photo-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .photo-icon { font-size: 28px; margin-bottom: 8px; }
+  .photo-text { font-size: 13px; color: var(--text3); }
+  .photo-text strong { color: var(--accent); }
+  .photo-preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .photo-preview img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); }
+  .photo-item { position: relative; }
+  .del-btn { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(0,0,0,0.7); border-radius: 50%; border: none; color: white; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* STEP PAGES */
+  .step-page { display: none; }
+  .step-page.active { display: block; animation: fadeSlide 0.3s ease; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* NAV */
+  .nav-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--surface); border-top: 1px solid var(--border); padding: 12px 16px 20px; display: flex; gap: 10px; z-index: 100; }
+  .btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn-back { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); flex: 0 0 80px; }
+  .btn-back:hover { background: var(--border); }
+  .btn-next { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-weight: 600; }
+  .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-submit { background: linear-gradient(135deg, var(--green), #059669); color: white; font-weight: 600; }
+  .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  /* SUCCESS */
+  #success-screen { display: none; text-align: center; padding: 60px 30px; animation: fadeSlide 0.4s ease; }
+  .success-icon { width: 90px; height: 90px; background: linear-gradient(135deg, var(--green), #059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 44px; margin: 0 auto 20px; box-shadow: 0 0 50px rgba(16,185,129,0.4); animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+  @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .success-title { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+  .success-message { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.55; margin-bottom: 28px; padding: 0 10px; }
+  .success-message .exec-highlight { color: var(--accent2); }
+  .success-message .amount-highlight { color: var(--green); }
+  .success-sub { color: var(--text2); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+  .success-meta { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; text-align: left; }
+  .success-meta-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .success-meta-row:last-child { border-bottom: none; }
+  .success-meta-row span:first-child { color: var(--text3); }
+  .success-meta-row span:last-child { color: var(--text); font-weight: 500; }
+  .btn-new { width: 100%; padding: 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+  /* LOADING */
+  #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+  #loading-overlay.show { display: flex; }
+  .spinner { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--text2); font-size: 14px; }
+
+  /* TOAST */
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--red); color: white; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 500; z-index: 1000; transition: transform 0.3s ease; white-space: nowrap; pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* SUMMARY */
+  .summary-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .summary-row:last-child { border-bottom: none; }
+  .summary-key { color: var(--text3); }
+  .summary-val { color: var(--text); font-weight: 500; text-align: right; max-width: 60%; }
+
+
+
+
+  /* ─── FLASH CARD ─── */
+  .flash-card {
+    margin: 0 20px 4px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(6,182,212,0.08));
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 10px;
+    padding: 14px 16px 14px 14px;
+    position: relative;
+    animation: flashIn 0.6s ease;
+  }
+  @keyframes flashIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .flash-quote-open {
+    font-family: 'Space Grotesk', Georgia, serif;
+    font-size: 52px;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.5;
+    display: block;
+    margin-bottom: -10px;
+    margin-left: 2px;
+  }
+  .flash-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.65;
+    padding: 0 6px;
+  }
+  .flash-text strong { color: var(--accent2); font-weight: 700; }
+  .flash-quote-close {
+    font-family: 'Space Grotesk', Georgia, serif;
+    font-size: 52px;
+    line-height: 0.4;
+    color: var(--accent);
+    opacity: 0.5;
+    display: block;
+    text-align: right;
+    margin-right: 2px;
+    margin-top: 4px;
+  }
+  /* ─── STATS BAR ─── */
+  .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 20px 4px; }
+  .stat-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px 12px; }
+  .stat-label { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+  .stat-row { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+  .stat-item { text-align: center; flex: 1; }
+  .stat-num { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; line-height: 1; }
+  .stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .stat-divider { width: 1px; background: rgba(255,255,255,0.1); align-self: stretch; }
+  .num-green { color: #10b981; }
+  .num-red { color: #ef4444; }
+  .num-white { color: #f1f5f9; }
+  .num-amber { color: #f59e0b; }
+  .progress-wrap { margin-top: 6px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+  @media (max-width: 360px) { .row { grid-template-columns: 1fr; } .pills, .multi-pills { gap: 6px; } .pill-label, .multi-pill { font-size: 12px; padding: 7px 11px; } }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay"><div class="spinner"></div><div class="loading-text">Submitting visit log…</div></div>
+<div class="toast" id="toast"></div>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="logo-icon" style="background:white;padding:2px;border-radius:10px;"><img src="data:image/png;base64,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" style="width:34px;height:34px;border-radius:8px;object-fit:contain;display:block;"></div>
+      <div>
+        <div class="logo-text">Field Visit Log</div>
+        <div class="logo-sub">Sales Activity Tracker</div>
+      </div>
+    </div>
+    <div class="header-date">
+      <strong id="header-date-str"></strong>
+      <div class="gps-status"><div class="gps-dot amber" id="gps-dot"></div><span id="gps-label">Getting location…</span></div>
+    </div>
+  </div>
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-card">
+      <div class="stat-label">Today's Meetings</div>
+      <div class="stat-row">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-today-done">—</div>
+          <div class="stat-sub">Done</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-num num-white">3</div>
+          <div class="stat-sub">Target</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="prog-today" style="width:0%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">This Month</div>
+      <div class="stat-row">
+        <div class="stat-item">
+          <div class="stat-num" id="stat-month-done">—</div>
+          <div class="stat-sub">Done</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-num num-white" id="stat-month-target">—</div>
+          <div class="stat-sub">Target</div>
+        </div>
+      </div>
+      <div class="progress-wrap"><div class="progress-fill" id="prog-month" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="flash-card"><span class="flash-quote-open">“</span><div class="flash-text" id="flash-text"></div><span class="flash-quote-close">”</span></div>
+  <div class="steps-bar" id="steps-bar"></div>
+</div>
+<div class="step-label" id="step-label"></div>
+
+<div class="content">
+
+  <!-- ══ STEP 1: Executive & Visit ══ -->
+  <div class="step-page active" id="step-1">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Executive Details</div>
+      <div class="field">
+        <label>Your Name <span class="req">*</span></label>
+        <select id="exec-name">
+          <option value="">Select your name</option>
+          <option>Abdul</option>
+          <option>Abhishek</option>
+          <option>Ayan</option>
+          <option>Dhruv</option>
+          <option>Dushyant</option>
+          <option>Gourav</option>
+          <option>Harsh</option>
+          <option>Mayank</option>
+          <option>Nitin</option>
+          <option>Nishant</option>
+          <option>Nishchint</option>
+          <option>Pushkar</option>
+          <option>Rahul</option>
+          <option>Rajnish</option>
+          <option>Sahil</option>
+          <option>Tushar</option>
+        </select>
+        <div class="err-msg" id="err-exec-name">Please select your name</div>
+      </div>
+      <div class="field">
+        <label>Accompanied By <span class="opt">(optional)</span></label>
+        <select id="accompanied-by">
+          <option value="">None — solo visit</option>
+          <option>Basant</option>
+          <option>Dipesh</option>
+          <option>Ritesh</option>
+        </select>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Visit Info</div>
+      <div class="row">
+        <div class="field">
+          <label>Date of Visit <span class="req">*</span></label>
+          <input type="date" id="visit-date">
+          <div class="err-msg" id="err-visit-date">Required</div>
+        </div>
+        <div class="field">
+          <label>Visit Number <span class="req">*</span></label>
+          <select id="visit-number">
+            <option value="">Select</option>
+            <option>1st Visit</option>
+            <option>2nd Visit</option>
+            <option>3rd Visit</option>
+            <option>4th Visit+</option>
+          </select>
+          <div class="err-msg" id="err-visit-number">Required</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2: Client Company ══ -->
+  <div class="step-page" id="step-2">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Client Company</div>
+      <div class="field">
+        <label>Client Type <span class="req">*</span></label>
+        <div class="pills">
+          <input type="radio" name="client-type" id="ct-company" value="Company" class="pill-option">
+          <label for="ct-company" class="pill-label">🏢 Company</label>
+          <input type="radio" name="client-type" id="ct-consultant" value="Consultant" class="pill-option">
+          <label for="ct-consultant" class="pill-label">🤝 Consultant</label>
+        </div>
+        <div class="err-msg" id="err-client-type">Please select client type</div>
+      </div>
+      <div class="field">
+        <label>New or Existing Client? <span class="req">*</span></label>
+        <div class="pills">
+          <input type="radio" name="client-status" id="cs-new" value="New" class="pill-option" onchange="toggleRID()">
+          <label for="cs-new" class="pill-label">✨ New</label>
+          <input type="radio" name="client-status" id="cs-existing" value="Existing" class="pill-option" onchange="toggleRID()">
+          <label for="cs-existing" class="pill-label">🔄 Existing</label>
+        </div>
+        <div class="err-msg" id="err-client-status">Please select</div>
+        <div class="cond-section" id="rid-section">
+          <label>Recruiter ID (RID) <span class="req">*</span></label>
+          <input type="text" id="recruiter-id" placeholder="Enter RID">
+          <div class="err-msg" id="err-recruiter-id">RID is required for existing clients</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Company Name <span class="req">*</span></label>
+        <input type="text" id="client-company" placeholder="Client company name">
+        <div class="err-msg" id="err-client-company">Required</div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>City <span class="req">*</span></label>
+          <input type="text" id="city" placeholder="City">
+          <div class="err-msg" id="err-city">Required</div>
+        </div>
+        <div class="field">
+          <label>Locality <span class="req">*</span></label>
+          <input type="text" id="locality" placeholder="Area / locality">
+          <div class="err-msg" id="err-locality">Required</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Hiring Categories <span class="req">*</span></label>
+        <div class="multi-pills" id="hiring-cats">
+          <div class="multi-pill" onclick="togglePill(this,'Tele Sales')">Tele Sales</div>
+          <div class="multi-pill" onclick="togglePill(this,'Retail Sales')">Retail Sales</div>
+          <div class="multi-pill" onclick="togglePill(this,'Field Sales')">Field Sales</div>
+          <div class="multi-pill" onclick="togglePill(this,'Customer Support')">Customer Support</div>
+          <div class="multi-pill" onclick="togglePill(this,'Delivery Boy')">Delivery Boy</div>
+          <div class="multi-pill" onclick="togglePill(this,'Picker')">Picker</div>
+          <div class="multi-pill" onclick="togglePill(this,'ITI/Technician')">ITI/Technician</div>
+          <div class="multi-pill" onclick="togglePill(this,'Cook/Chef')">Cook/Chef</div>
+          <div class="multi-pill" onclick="togglePill(this,'Housekeeping')">Housekeeping</div>
+          <div class="multi-pill" onclick="togglePill(this,'Security Guard')">Security Guard</div>
+          <div class="multi-pill" onclick="togglePill(this,'Labour/Helper')">Labour/Helper</div>
+          <div class="multi-pill" onclick="togglePill(this,'Maid')">Maid</div>
+          <div class="multi-pill" onclick="togglePill(this,'Designer/Web-Graphic')">Designer/Web-Graphic</div>
+          <div class="multi-pill" onclick="togglePill(this,'Manufacturing')">Manufacturing</div>
+          <div class="multi-pill" onclick="togglePill(this,'Others')">Others</div>
+        </div>
+        <div class="err-msg" id="err-hiring-cats">Please select at least one category</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3: Contact Person ══ -->
+  <div class="step-page" id="step-3">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Contact Person</div>
+      <div class="field">
+        <label>Contact Person Name <span class="req">*</span></label>
+        <input type="text" id="contact-name" placeholder="Full name">
+        <div class="err-msg" id="err-contact-name">Required</div>
+      </div>
+      <div class="field">
+        <label>Designation <span class="req">*</span></label>
+        <select id="contact-desig">
+          <option value="">Select designation</option>
+          <option>HR Manager</option>
+          <option>Talent Acquisition</option>
+          <option>Business Owner</option>
+          <option>MD / Director</option>
+          <option>Finance & Admin</option>
+          <option>Recruiter</option>
+          <option>Other</option>
+        </select>
+        <div class="err-msg" id="err-contact-desig">Required</div>
+      </div>
+      <div class="field">
+        <label>Mobile Number <span class="req">*</span></label>
+        <input type="tel" id="contact-mobile" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+        <div class="err-msg" id="err-contact-mobile">Enter a valid 10-digit Indian mobile number</div>
+      </div>
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <input type="email" id="contact-email" placeholder="contact@company.com" inputmode="email">
+        <div class="err-msg" id="err-contact-email">Enter a valid email address</div>
+      </div>
+      <div class="field">
+        <label>Is this the Decision Maker? <span class="req">*</span></label>
+        <div class="pills">
+          <input type="radio" name="is-dm" id="dm-yes" value="Yes" class="pill-option" onchange="toggleDM()">
+          <label for="dm-yes" class="pill-label">✓ Yes</label>
+          <input type="radio" name="is-dm" id="dm-no" value="No" class="pill-option" onchange="toggleDM()">
+          <label for="dm-no" class="pill-label">✗ No</label>
+        </div>
+        <div class="err-msg" id="err-is-dm">Required</div>
+        <div class="cond-section" id="dm-section">
+          <div class="field">
+            <label>Decision Maker Name <span class="opt">(optional)</span></label>
+            <input type="text" id="dm-name" placeholder="Name of actual decision maker">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Decision Maker Designation <span class="opt">(optional)</span></label>
+            <select id="dm-desig">
+              <option value="">Select</option>
+              <option>HR Manager</option>
+              <option>Talent Acquisition</option>
+              <option>Business Owner</option>
+              <option>MD / Director</option>
+              <option>Finance & Admin</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4: Meeting Details ══ -->
+  <div class="step-page" id="step-4">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Meeting Details</div>
+      <div class="field">
+        <label>Meeting Type <span class="req">*</span></label>
+        <div class="pills">
+          <input type="radio" name="meeting-type" id="mt-inperson" value="In Person" class="pill-option">
+          <label for="mt-inperson" class="pill-label">🤝 In Person</label>
+          <input type="radio" name="meeting-type" id="mt-virtual" value="Virtual" class="pill-option">
+          <label for="mt-virtual" class="pill-label">💻 Virtual</label>
+        </div>
+        <div class="err-msg" id="err-meeting-type">Please select meeting type</div>
+      </div>
+      <div class="field">
+        <label>Monthly Hiring Requirement <span class="req">*</span></label>
+        <select id="hiring-req">
+          <option value="">Select range</option>
+          <option>1–5</option>
+          <option>6–10</option>
+          <option>11–20</option>
+          <option>21–50</option>
+          <option>50+</option>
+          <option>Not Disclosed</option>
+        </select>
+        <div class="err-msg" id="err-hiring-req">Required</div>
+      </div>
+      <div class="field">
+        <label>Quotation Amount (Excl. GST) <span class="req">*</span></label>
+        <div class="currency-wrap">
+          <input type="number" id="quotation-amount" placeholder="0" min="0" inputmode="numeric">
+        </div>
+        <div class="helper-text">Enter 0 if no quotation given yet</div>
+        <div class="err-msg" id="err-quotation-amount">Required</div>
+      </div>
+      <div class="field">
+        <label>Proposal / Quotation Shared? <span class="req">*</span></label>
+        <div class="pills">
+          <input type="radio" name="proposal" id="prop-yes" value="Yes" class="pill-option">
+          <label for="prop-yes" class="pill-label">✓ Yes</label>
+          <input type="radio" name="proposal" id="prop-no" value="No" class="pill-option">
+          <label for="prop-no" class="pill-label">✗ No</label>
+          <input type="radio" name="proposal" id="prop-later" value="Will Share Later" class="pill-option">
+          <label for="prop-later" class="pill-label">⏳ Will Share Later</label>
+        </div>
+        <div class="err-msg" id="err-proposal">Required</div>
+      </div>
+      <div class="field">
+        <label>MoM / Key Notes <span class="opt">(optional)</span></label>
+        <textarea id="mom" placeholder="Key points discussed &amp; next step?"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5: Outcome ══ -->
+  <div class="step-page" id="step-5">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Meeting Outcome</div>
+      <div class="field">
+        <label>Outcome <span class="req">*</span></label>
+        <div class="pills" style="flex-direction: column; align-items: flex-start;">
+          <input type="radio" name="outcome" id="out-converted" value="Converted" class="pill-option" onchange="toggleOutcome()">
+          <label for="out-converted" class="pill-label" style="width:100%; justify-content:flex-start; gap:8px;">✅ Converted</label>
+          <input type="radio" name="outcome" id="out-interested" value="Interested" class="pill-option" onchange="toggleOutcome()">
+          <label for="out-interested" class="pill-label" style="width:100%; justify-content:flex-start; gap:8px;">🔥 Interested</label>
+          <input type="radio" name="outcome" id="out-followup" value="Follow Up" class="pill-option" onchange="toggleOutcome()">
+          <label for="out-followup" class="pill-label" style="width:100%; justify-content:flex-start; gap:8px;">📅 Follow Up</label>
+          <input type="radio" name="outcome" id="out-dropped" value="Dropped" class="pill-option" onchange="toggleOutcome()">
+          <label for="out-dropped" class="pill-label" style="width:100%; justify-content:flex-start; gap:8px;">❌ Dropped</label>
+        </div>
+        <div class="err-msg" id="err-outcome">Please select an outcome</div>
+      </div>
+
+      <!-- If Converted -->
+      <div class="cond-section" id="converted-section">
+        <label>Amount Converted (Excl. GST) <span class="req">*</span></label>
+        <div class="currency-wrap">
+          <input type="number" id="converted-amount" placeholder="0" min="500" inputmode="numeric">
+        </div>
+        <div class="helper-text">Minimum ₹500</div>
+        <div class="err-msg" id="err-converted-amount">Please enter the converted amount (min ₹500)</div>
+      </div>
+
+      <!-- If Interested or Follow Up -->
+      <div class="cond-section" id="followup-section">
+        <label>Follow Up Date <span class="req">*</span></label>
+        <input type="date" id="followup-date">
+        <div class="err-msg" id="err-followup-date">Please select a follow-up date</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6: Photo & Review ══ -->
+  <div class="step-page" id="step-6">
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Visit Photo <span style="color:var(--red);margin-left:2px;">*</span></div>
+      <div class="photo-upload" id="photo-drop">
+        <input type="file" id="photo-input" accept="image/*" multiple capture="environment" onchange="handlePhotos(this)">
+        <div class="photo-icon">📸</div>
+        <div class="photo-text"><strong>Tap to take photo</strong><br>At least 1 photo required · Max 2</div>
+      </div>
+      <div class="photo-preview" id="photo-preview"></div>
+      <div class="err-msg" id="err-photo">At least 1 photo is required</div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="dot"></span>Review Before Submitting</div>
+      <div id="summary-box"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN (outside .content so display:none on content doesn't hide it) -->
+<div id="success-screen" style="display:none; text-align:center; padding:60px 30px; max-width:600px; margin:0 auto;">
+  <div class="success-icon">✓</div>
+  <div class="success-title" id="success-title">Visit Logged!</div>
+  <div class="success-message" id="success-message"></div>
+  <div class="success-sub">Your visit has been recorded and saved to Google Sheets.</div>
+  <div class="success-meta" id="success-meta"></div>
+  <button class="btn-new" onclick="resetForm()">+ Log Another Visit</button>
+</div>
+
+<!-- NAV -->
+<div class="nav-bar" id="nav-bar">
+  <button class="btn btn-back" id="btn-back" onclick="prevStep()" style="display:none">← Back</button>
+  <button class="btn btn-next" id="btn-next" onclick="nextStep()">Continue →</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// ⚙️ PASTE YOUR GOOGLE APPS SCRIPT URL HERE
+// ══════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbySjjnzXh3fXl0Aw1_KwHuTBH3TrTayWo-ze8-WfyqfFU6mPJpf9V2dArRyOwrspO2JnQ/exec';
+// ══════════════════════════════════════════
+
+const TOTAL_STEPS = 6;
+let currentStep = 1;
+let photoFiles = [];
+let photoBase64 = [];
+let gpsLat = '';
+let gpsLng = '';
+let selectedHiringCats = [];
+
+// ── Init ──
+const today = new Date();
+document.getElementById('visit-date').value = today.toISOString().split('T')[0];
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+document.getElementById('header-date-str').textContent = `${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+
+// Set min follow up date to tomorrow
+const tomorrow = new Date(today);
+tomorrow.setDate(tomorrow.getDate() + 1);
+document.getElementById('followup-date').min = tomorrow.toISOString().split('T')[0];
+
+// ── GPS ──
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      gpsLat = pos.coords.latitude.toFixed(6);
+      gpsLng = pos.coords.longitude.toFixed(6);
+      document.getElementById('gps-dot').className = 'gps-dot green';
+      document.getElementById('gps-label').textContent = 'Location captured';
+    },
+    () => {
+      document.getElementById('gps-dot').className = 'gps-dot';
+      document.getElementById('gps-label').textContent = 'Location unavailable';
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+} else {
+  document.getElementById('gps-label').textContent = 'GPS not supported';
+}
+
+// ── Steps bar ──
+function renderStepsBar() {
+  const bar = document.getElementById('steps-bar');
+  bar.innerHTML = '';
+  for (let i = 1; i <= TOTAL_STEPS; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'step-seg' + (i < currentStep ? ' done' : i === currentStep ? ' active' : '');
+    bar.appendChild(seg);
+  }
+  const labels = ['Executive','Client','Contact','Meeting','Outcome','Submit'];
+  document.getElementById('step-label').innerHTML = `Step ${currentStep} of ${TOTAL_STEPS} — <strong>${labels[currentStep-1]}</strong>`;
+  document.getElementById('btn-back').style.display = currentStep > 1 ? 'flex' : 'none';
+  const nb = document.getElementById('btn-next');
+  if (currentStep === TOTAL_STEPS) { nb.className = 'btn btn-submit'; nb.innerHTML = '✓ Submit Visit'; }
+  else { nb.className = 'btn btn-next'; nb.innerHTML = 'Continue →'; }
+}
+
+// ── Conditional toggles ──
+function toggleRID() {
+  const isExisting = document.querySelector('input[name="client-status"]:checked')?.value === 'Existing';
+  document.getElementById('rid-section').classList.toggle('show', isExisting);
+  if (!isExisting) document.getElementById('recruiter-id').value = '';
+}
+function toggleDM() {
+  const isNo = document.querySelector('input[name="is-dm"]:checked')?.value === 'No';
+  document.getElementById('dm-section').classList.toggle('show', isNo);
+}
+function toggleOutcome() {
+  const val = document.querySelector('input[name="outcome"]:checked')?.value;
+  document.getElementById('converted-section').classList.toggle('show', val === 'Converted');
+  document.getElementById('followup-section').classList.toggle('show', val === 'Interested' || val === 'Follow Up');
+  if (val !== 'Converted') document.getElementById('converted-amount').value = '';
+  if (val === 'Converted' || val === 'Dropped') document.getElementById('followup-date').value = '';
+}
+
+// ── Multi-pill toggle ──
+function togglePill(el, val) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    if (!selectedHiringCats.includes(val)) selectedHiringCats.push(val);
+  } else {
+    selectedHiringCats = selectedHiringCats.filter(v => v !== val);
+  }
+}
+
+// ── Validation ──
+function validateStep(step) {
+  let ok = true;
+  function check(id, errId, fn) {
+    const el = document.getElementById(id);
+    const err = document.getElementById(errId);
+    const val = el ? el.value : '';
+    if (!fn(val)) { if(el) el.classList.add('error'); err.classList.add('show'); ok = false; }
+    else { if(el) el.classList.remove('error'); err.classList.remove('show'); }
+  }
+  function checkRadio(name, errId) {
+    const chosen = document.querySelector(`input[name="${name}"]:checked`);
+    const err = document.getElementById(errId);
+    if (!chosen) { err.classList.add('show'); ok = false; }
+    else { err.classList.remove('show'); }
+  }
+
+  if (step === 1) {
+    check('exec-name', 'err-exec-name', v => v !== '');
+    check('visit-date', 'err-visit-date', v => v !== '');
+    check('visit-number', 'err-visit-number', v => v !== '');
+  }
+  if (step === 2) {
+    checkRadio('client-type', 'err-client-type');
+    checkRadio('client-status', 'err-client-status');
+    // RID if existing
+    const isExisting = document.querySelector('input[name="client-status"]:checked')?.value === 'Existing';
+    if (isExisting) check('recruiter-id', 'err-recruiter-id', v => v.trim().length > 0);
+    check('client-company', 'err-client-company', v => v.trim().length > 1);
+    check('city', 'err-city', v => v.trim().length > 0);
+    check('locality', 'err-locality', v => v.trim().length > 0);
+    // Hiring categories
+    const catErr = document.getElementById('err-hiring-cats');
+    if (selectedHiringCats.length === 0) { catErr.classList.add('show'); ok = false; }
+    else { catErr.classList.remove('show'); }
+  }
+  if (step === 3) {
+    check('contact-name', 'err-contact-name', v => v.trim().length > 1);
+    check('contact-desig', 'err-contact-desig', v => v !== '');
+    check('contact-mobile', 'err-contact-mobile', v => /^[6-9]\d{9}$/.test(v));
+    check('contact-email', 'err-contact-email', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+    checkRadio('is-dm', 'err-is-dm');
+  }
+  if (step === 4) {
+    checkRadio('meeting-type', 'err-meeting-type');
+    check('hiring-req', 'err-hiring-req', v => v !== '');
+    check('quotation-amount', 'err-quotation-amount', v => v !== '' && v !== null);
+    checkRadio('proposal', 'err-proposal');
+  }
+  if (step === 5) {
+    checkRadio('outcome', 'err-outcome');
+    const outcome = document.querySelector('input[name="outcome"]:checked')?.value;
+    if (outcome === 'Converted') {
+      check('converted-amount', 'err-converted-amount', v => parseFloat(v) >= 500);
+    }
+    if (outcome === 'Interested' || outcome === 'Follow Up') {
+      check('followup-date', 'err-followup-date', v => v !== '');
+    }
+  }
+  return ok;
+}
+
+function nextStep() {
+  if (currentStep === TOTAL_STEPS) {
+    // Photo mandatory check with visible error before calling submitForm
+    if (photoBase64.length === 0 && photoFiles.length === 0) {
+      const errEl = document.getElementById('err-photo');
+      if (errEl) { errEl.classList.add('show'); errEl.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      showToast('📸 Please take at least 1 photo before submitting');
+      return;
+    }
+    submitForm();
+    return;
+  }
+  if (!validateStep(currentStep)) { showToast('Please fill all required fields'); return; }
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  currentStep++;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  renderStepsBar();
+  window.scrollTo(0, 0);
+  if (currentStep === TOTAL_STEPS) buildSummary();
+}
+
+function prevStep() {
+  if (currentStep <= 1) return;
+  document.getElementById('step-' + currentStep).classList.remove('active');
+  currentStep--;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  renderStepsBar();
+  window.scrollTo(0, 0);
+}
+
+// ── Photos ──
+function handlePhotos(input) {
+  // Clear photo error when user adds a photo
+  const photoErr = document.getElementById('err-photo');
+  if (photoErr) photoErr.classList.remove('show');
+  Array.from(input.files).forEach(file => {
+    if (photoFiles.length >= 2) return;
+    photoFiles.push(file);
+    // Compress to max 800px, 60% JPEG quality — keeps payload small
+    const img = new Image();
+    const objUrl = URL.createObjectURL(file);
+    img.onload = function() {
+      const MAX = 400;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      photoBase64.push(canvas.toDataURL('image/jpeg', 0.35));
+      URL.revokeObjectURL(objUrl);
+      renderPhotoPreviews();
+    };
+    img.src = objUrl;
+  });
+}
+function renderPhotoPreviews() {
+  const preview = document.getElementById('photo-preview');
+  preview.innerHTML = '';
+  photoBase64.forEach((src, i) => {
+    const item = document.createElement('div');
+    item.className = 'photo-item';
+    item.innerHTML = `<img src="${src}" alt="Photo ${i+1}"><button class="del-btn" onclick="removePhoto(${i})">×</button>`;
+    preview.appendChild(item);
+  });
+}
+function removePhoto(i) { photoFiles.splice(i,1); photoBase64.splice(i,1); renderPhotoPreviews(); }
+
+// ── Summary ──
+function buildSummary() {
+  const v = id => document.getElementById(id)?.value || '—';
+  const r = name => document.querySelector(`input[name="${name}"]:checked`)?.value || '—';
+  const outcome = r('outcome');
+  const rows = [
+    ['Executive', v('exec-name')],
+    ['Visit No.', v('visit-number')],
+    ['Date', v('visit-date')],
+    ['Client', v('client-company') + ' (' + r('client-type') + ')'],
+    ['Status', r('client-status') + (r('client-status')==='Existing' ? ' · RID: '+v('recruiter-id') : '')],
+    ['City', v('city') + (v('locality') !== '—' ? ', '+v('locality') : '')],
+    ['Hiring For', selectedHiringCats.join(', ') || '—'],
+    ['Contact', v('contact-name') + ' · ' + v('contact-desig')],
+    ['Mobile', v('contact-mobile')],
+    ['Quotation', v('quotation-amount') !== '—' ? '₹'+Number(v('quotation-amount')).toLocaleString('en-IN') : '—'],
+    ['Outcome', outcome + (outcome==='Converted' ? ' · ₹'+Number(v('converted-amount')).toLocaleString('en-IN') : outcome==='Interested'||outcome==='Follow Up' ? ' · '+v('followup-date') : '')],
+    ['Location', gpsLat ? `${gpsLat}, ${gpsLng}` : 'Not captured'],
+  ];
+  document.getElementById('summary-box').innerHTML = rows.map(([k,val]) =>
+    `<div class="summary-row"><span class="summary-key">${k}</span><span class="summary-val">${val}</span></div>`
+  ).join('');
+}
+
+// ── Submit ──
+async function submitForm() {
+  // Wait for any in-progress photo compression to finish
+  if (photoFiles.length > 0 && photoBase64.length < photoFiles.length) {
+    showToast('⏳ Photo still processing, please wait a moment…');
+    setTimeout(() => submitForm(), 800);
+    return;
+  }
+  // Photo is mandatory
+  if (photoBase64.length === 0) {
+    const errEl = document.getElementById('err-photo');
+    if (errEl) errEl.classList.add('show');
+    showToast('📸 Please take at least 1 photo before submitting');
+    return;
+  }
+  const errEl = document.getElementById('err-photo');
+  if (errEl) errEl.classList.remove('show');
+  if (!validateStep(5)) { currentStep = 5; document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active')); document.getElementById('step-5').classList.add('active'); renderStepsBar(); return; }
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') { showToast('⚠️ Script URL not configured'); return; }
+
+  const v = id => document.getElementById(id)?.value || '';
+  const r = name => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+  const outcome = r('outcome');
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    gpsLat, gpsLng,
+    execName: v('exec-name'),
+    accompaniedBy: v('accompanied-by'),
+    visitDate: v('visit-date'),
+    visitNumber: v('visit-number'),
+    clientType: r('client-type'),
+    clientStatus: r('client-status'),
+    recruiterId: v('recruiter-id'),
+    clientCompany: v('client-company'),
+    city: v('city'),
+    locality: v('locality'),
+    hiringCategories: selectedHiringCats.join(', '),
+    contactName: v('contact-name'),
+    contactDesig: v('contact-desig'),
+    contactMobile: v('contact-mobile'),
+    contactEmail: v('contact-email'),
+    isDecisionMaker: r('is-dm'),
+    dmName: v('dm-name'),
+    dmDesig: v('dm-desig'),
+    hiringReq: v('hiring-req'),
+    meetingType: r('meeting-type'),
+    quotationAmount: v('quotation-amount'),
+    proposalShared: r('proposal'),
+    mom: v('mom'),
+    outcome,
+    convertedAmount: outcome === 'Converted' ? v('converted-amount') : '',
+    followUpDate: (outcome === 'Interested' || outcome === 'Follow Up') ? v('followup-date') : '',
+    photos: photoBase64.slice(0,2).map(p => {
+      // Safety: if still too large after compress, send empty string
+      return (p && p.length < 600000) ? p : '';
+    }),
+  };
+
+  document.getElementById('loading-overlay').classList.add('show');
+  document.getElementById('btn-next').disabled = true;
+
+  try {
+    // Send everything including photos in ONE request
+    // Photos are already compressed to ~80-150KB so total payload is safe
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    setTimeout(() => showSuccess(payload), 200);
+  } catch(err) {
+    document.getElementById('loading-overlay').classList.remove('show');
+    document.getElementById('btn-next').disabled = false;
+    showToast('Submission failed. Check connection & try again.');
+  }
+}
+
+function showSuccess(p) {
+  loadStats(p.execName, p.visitDate);
+  document.getElementById('loading-overlay').classList.remove('show');
+  document.querySelector('.content').style.display = 'none';
+  document.getElementById('nav-bar').style.display = 'none';
+  document.querySelector('.step-label').style.display = 'none';
+  document.querySelector('.steps-bar').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  const name = p.execName || 'Champion';
+  const msgEl = document.getElementById('success-message');
+  const titleEl = document.getElementById('success-title');
+
+  if (p.outcome === 'Converted') {
+    const amt = p.convertedAmount
+      ? '₹' + Number(p.convertedAmount).toLocaleString('en-IN')
+      : 'a great amount';
+    titleEl.textContent = 'Congratulations! 🎉';
+    msgEl.innerHTML =
+      `<span class="exec-highlight">${name}</span>! You just added ` +
+      `<span class="amount-highlight">${amt}</span> to your achievement. ` +
+      `That's what excellence looks like — keep going!`;
+  } else if (p.outcome === 'Interested' || p.outcome === 'Follow Up') {
+    titleEl.textContent = 'Great Job! 💪';
+    msgEl.innerHTML =
+      `<span class="exec-highlight">${name}</span>! You have successfully added ` +
+      `one more client to your pipeline. ` +
+      `Consistent follow-up is what separates the best from the rest!`;
+  } else if (p.outcome === 'Dropped') {
+    titleEl.textContent = 'Good Job! 🙌';
+    msgEl.innerHTML =
+      `<span class="exec-highlight">${name}</span>! I hope you have learned something new ` +
+      `in this meeting today. Reflect, adapt, and the next one will be closer to a win!`;
+  } else {
+    titleEl.textContent = 'Visit Logged! ✓';
+    msgEl.innerHTML = `Well done, <span class="exec-highlight">${name}</span>! Keep up the great work.`;
+  }
+
+  document.getElementById('success-meta').innerHTML = [
+    ['Client', p.clientCompany],
+    ['City', p.city],
+    ['Outcome', p.outcome],
+    ['Date', p.visitDate],
+  ].map(([k,v]) => `<div class="success-meta-row"><span>${k}</span><span>${v||'—'}</span></div>`).join('');
+}
+
+function resetForm() {
+  document.querySelector('.content').style.display = 'block';
+  document.getElementById('nav-bar').style.display = 'flex';
+  document.querySelector('.step-label').style.display = 'block';
+  document.querySelector('.steps-bar').style.display = 'flex';
+  document.getElementById('success-screen').style.display = 'none';
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  currentStep = 1;
+  document.getElementById('step-1').classList.add('active');
+  photoFiles=[]; photoBase64=[]; selectedHiringCats=[];
+  document.getElementById('photo-preview').innerHTML = '';
+  document.querySelectorAll('input[type="text"],input[type="email"],input[type="tel"],input[type="number"],textarea').forEach(el => el.value='');
+  document.querySelectorAll('select').forEach(el => el.selectedIndex=0);
+  document.querySelectorAll('input[type="radio"]').forEach(el => el.checked=false);
+  document.querySelectorAll('.multi-pill').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.cond-section').forEach(el => el.classList.remove('show'));
+  document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
+  renderStepsBar(); window.scrollTo(0,0);
+  document.getElementById('btn-next').disabled = false;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+
+
+// ── Stats: pulled live from Google Sheet ──
+let statsCache = {}; // cache per exec to avoid hammering the sheet
+
+function getWorkingDaysInMonth(year, month, upToDay) {
+  let count = 0;
+  for (let d = 1; d <= upToDay; d++) {
+    const day = new Date(year, month, d).getDay();
+    if (day !== 0 && day !== 6) count++;
+  }
+  return count;
+}
+
+function renderStats(todayDone, monthDone, monthTarget) {
+  const dailyTarget = 3;
+
+  // Today — red for 0,1,2 | green for 3+
+  const todayEl = document.getElementById('stat-today-done');
+  todayEl.textContent = todayDone;
+  const todayMet = todayDone >= dailyTarget;
+  todayEl.className = 'stat-num ' + (todayMet ? 'num-green' : 'num-red');
+  const todayPct = Math.min(100, Math.round((todayDone / dailyTarget) * 100));
+  const progToday = document.getElementById('prog-today');
+  progToday.style.width = todayPct + '%';
+  progToday.style.background = todayMet ? '#10b981' : '#ef4444';
+
+  // Month — red if below target | green if at or above target
+  const monthEl = document.getElementById('stat-month-done');
+  monthEl.textContent = monthDone;
+  document.getElementById('stat-month-target').textContent = monthTarget;
+  const monthMet = monthTarget === 0 || monthDone >= monthTarget;
+  monthEl.className = 'stat-num ' + (monthMet ? 'num-green' : 'num-red');
+  const monthPct = monthTarget > 0 ? Math.min(100, Math.round((monthDone / monthTarget) * 100)) : 0;
+  const progMonth = document.getElementById('prog-month');
+  progMonth.style.width = monthPct + '%';
+  progMonth.style.background = monthMet ? '#10b981' : '#ef4444';
+}
+
+async function loadStats(submittedExec, submittedDate) {
+  const execName = submittedExec || document.getElementById('exec-name').value;
+  if (!execName) { renderStats(0, 0, 0); return; }
+
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];         // YYYY-MM-DD
+  const monthPrefix = todayStr.substring(0, 7);             // YYYY-MM
+  const workingDaysSoFar = getWorkingDaysInMonth(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthTarget = 3 * workingDaysSoFar;
+
+  // Use cache if available and fresh (< 5 min) and not a fresh submit
+  const cacheKey = execName + '_' + todayStr;
+  if (!submittedExec && statsCache[cacheKey] && (Date.now() - statsCache[cacheKey].ts < 5 * 60 * 1000)) {
+    renderStats(statsCache[cacheKey].todayDone, statsCache[cacheKey].monthDone, monthTarget);
+    return;
+  }
+
+  // Show dashes while loading
+  document.getElementById('stat-today-done').textContent = '…';
+  document.getElementById('stat-month-done').textContent = '…';
+  document.getElementById('stat-month-target').textContent = monthTarget;
+
+  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    renderStats(0, 0, monthTarget);
+    return;
+  }
+
+  try {
+    // Try GET first (doGet), if that fails try POST (doPost with action:stats)
+    let data = null;
+    try {
+      const statsUrl = SCRIPT_URL +
+        '?action=stats&exec=' + encodeURIComponent(execName) +
+        '&today=' + encodeURIComponent(todayStr) +
+        '&month=' + encodeURIComponent(monthPrefix);
+      const getRes = await fetch(statsUrl);
+      const getText = await getRes.text();
+      try { data = JSON.parse(getText); } catch(e2) { data = null; }
+    } catch(getErr) { data = null; }
+
+    // Fallback to POST if GET failed or returned bad data
+    if (!data || data.status !== 'ok') {
+      const postRes = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stats', exec: execName, today: todayStr, month: monthPrefix })
+      });
+      // no-cors POST can't be read - if GET also failed, show zeros
+      data = null;
+    }
+
+    if (data && data.status === 'ok') {
+      const todayDone = (data.todayCount || 0);
+      const monthDone = (data.monthCount || 0);
+      statsCache[cacheKey] = { todayDone, monthDone, ts: Date.now() };
+      renderStats(todayDone, monthDone, monthTarget);
+    } else {
+      renderStats(0, 0, monthTarget);
+      if (!submittedExec) showToast('⚠️ Update your Apps Script to see live counts');
+    }
+  } catch(err) {
+    renderStats(0, 0, monthTarget);
+  }
+}
+
+// Reload stats when exec name changes
+document.getElementById('exec-name').addEventListener('change', () => loadStats());
+
+// Show correct monthTarget immediately even before exec selects name
+(function() {
+  const now = new Date();
+  const workingDaysSoFar = getWorkingDaysInMonth(now.getFullYear(), now.getMonth(), now.getDate());
+  const monthTarget = 3 * workingDaysSoFar;
+  renderStats(0, 0, monthTarget);
+})();
+
+
+// ── Daily motivational flash ──
+const FLASH_TIPS = [
+  "<strong>Pipeline = Predictability.</strong> Every quality meeting you log today is revenue your manager can forecast tomorrow. Keep it full.",
+  "<strong>Upsell with context, not pressure.</strong> When you understand what a client is building, the upgrade sells itself — show value, not price.",
+  "<strong>Get the decision-maker in the room.</strong> The best demo in the world fails if the person who signs isn't watching. Always ask who else should join.",
+  "<strong>A warm quotation beats a cold number.</strong> Before you send the price, remind them what they told you in the meeting. Make it feel personal.",
+  "<strong>Renewal is your real scorecard.</strong> A client who comes back is proof you delivered. Retention > Acquisition, every single time.",
+  "<strong>In-person visits close 3–4x faster.</strong> A handshake builds in minutes what 10 emails can't. Show up whenever you possibly can.",
+  "<strong>Protect your selling hours.</strong> One hour with a high-intent prospect is worth more than five calls to cold leads. Choose your time wisely.",
+  "<strong>Qualify hard, pitch less.</strong> Before you present anything, ask: Do they have the need? The budget? The authority? No on any one = not yet.",
+  "<strong>Most deals close on the 5th follow-up.</strong> The executive who follows up consistently wins the deal the impatient one walked away from.",
+  "<strong>Listen more than you talk.</strong> Your prospect's exact words are your pitch. Ask one good question, then stay quiet and take notes.",
+  "<strong>Speed is a superpower.</strong> The rep who responds first often wins — even if the product isn't the cheapest. Don't let leads go cold.",
+  "<strong>Proof beats promises.</strong> Drop a client name, a number, a result in every conversation. Credibility removes risk and accelerates decisions.",
+  "<strong>Create urgency — not desperation.</strong> Give them a real reason to act today: a limited offer, a quarter-end date, a competitor moving faster.",
+  "<strong>Discovery = control.</strong> The rep who asks the best questions in the first meeting controls every meeting after it. Prepare your questions.",
+  "<strong>Your best lead is a referral.</strong> After every conversion, ask: 'Who else in your network could benefit from this?' One question. Infinite pipeline.",
+];
+
+function showFlashTip() {
+  const el = document.getElementById('flash-text');
+  if (!el) return;
+  // Use date + a small hash so it changes daily but is same for everyone on same day
+  const dayIndex = Math.floor(Date.now() / 86400000) % FLASH_TIPS.length;
+  el.innerHTML = FLASH_TIPS[dayIndex];
+}
+showFlashTip();
+
+renderStepsBar();
+</script>
+
+<!--
+════════════════════════════════════════════════════════
+  GOOGLE APPS SCRIPT — paste this in script.google.com
+════════════════════════════════════════════════════════
+
+const SHEET_ID = '12of5fJDYhxLdN3prVfiv9uj-xaTbdT_PQO3L77PEZQ0';
+const SHEET_NAME = 'Field Visits';
+const DRIVE_FOLDER_NAME = 'Field Visit Photos';
+
+// IMPORTANT: This doGet handles stats requests from the app
+// Make sure you REDEPLOY after pasting this updated code
+function doGet(e) {
+  // Set CORS headers so the app can read the response
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  try {
+    if (e.parameter.action === 'stats') {
+      const execName = (e.parameter.exec || '').trim();
+      const today = e.parameter.today || '';
+      const month = e.parameter.month || '';
+      const ss = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) {
+        output.setContent(JSON.stringify({ status: 'ok', todayCount: 0, monthCount: 0 }));
+        return output;
+      }
+      const data = sheet.getDataRange().getValues();
+      // Col indexes (0-based): 0=Timestamp, 3=ExecName, 5=VisitDate
+      let todayCount = 0, monthCount = 0;
+      for (let i = 1; i < data.length; i++) {
+        const rowExec = (data[i][3] || '').toString().trim().toLowerCase();
+        const rawDate = data[i][5];
+        let rowDate = '';
+        if (rawDate instanceof Date) {
+          rowDate = Utilities.formatDate(rawDate, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+        } else {
+          rowDate = (rawDate || '').toString().trim().substring(0, 10);
+        }
+        if (rowExec !== execName.toLowerCase()) continue;
+        if (rowDate === today) todayCount++;
+        if (rowDate.startsWith(month)) monthCount++;
+      }
+      output.setContent(JSON.stringify({ status: 'ok', todayCount, monthCount }));
+      return output;
+    }
+    output.setContent(JSON.stringify({ status: 'error', message: 'Unknown action' }));
+    return output;
+  } catch(err) {
+    output.setContent(JSON.stringify({ status: 'error', message: err.toString() }));
+    return output;
+  }
+}
+
+function jsonOut(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  const output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  // Apps Script handles CORS automatically when deployed as "Anyone can access"
+  // No additional headers needed
+  try {
+    if (e.parameter.action === 'stats') {
+      const execName = (e.parameter.exec || '').trim();
+      const today = e.parameter.today || '';
+      const month = e.parameter.month || '';
+      const ss = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) { output.setContent(JSON.stringify({ status: 'ok', todayCount: 0, monthCount: 0 })); return output; }
+      const data = sheet.getDataRange().getValues();
+      let todayCount = 0, monthCount = 0;
+      for (let i = 1; i < data.length; i++) {
+        const rowExec = (data[i][3] || '').toString().trim().toLowerCase();
+        const rawDate = data[i][5];
+        let rowDate = '';
+        if (rawDate instanceof Date) {
+          rowDate = Utilities.formatDate(rawDate, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+        } else {
+          rowDate = (rawDate || '').toString().trim().substring(0, 10);
+        }
+        if (rowExec !== execName.toLowerCase()) continue;
+        if (rowDate === today) todayCount++;
+        if (rowDate.startsWith(month)) monthCount++;
+      }
+      output.setContent(JSON.stringify({ status: 'ok', todayCount, monthCount }));
+      return output;
+    }
+    output.setContent(JSON.stringify({ status: 'error', message: 'Unknown action' }));
+    return output;
+  } catch(err) {
+    output.setContent(JSON.stringify({ status: 'error', message: err.toString() }));
+    return output;
+  }
+}
+
+function doPost(e) {
+  try {
+    const d = JSON.parse(e.postData.contents);
+
+    // Handle stats request via POST (fallback if GET doesn't work)
+    if (d.action === 'stats') {
+      const ss = SpreadsheetApp.openById(SHEET_ID);
+      const sheet = ss.getSheetByName(SHEET_NAME);
+      if (!sheet) return jsonOut({ status: 'ok', todayCount: 0, monthCount: 0 });
+      const data = sheet.getDataRange().getValues();
+      let todayCount = 0, monthCount = 0;
+      for (let i = 1; i < data.length; i++) {
+        const rowExec = (data[i][3] || '').toString().trim().toLowerCase();
+        const rawDate = data[i][5];
+        let rowDate = rawDate instanceof Date
+          ? Utilities.formatDate(rawDate, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+          : (rawDate || '').toString().trim().substring(0, 10);
+        if (rowExec !== d.exec.toLowerCase()) continue;
+        if (rowDate === d.today) todayCount++;
+        if (rowDate.startsWith(d.month)) monthCount++;
+      }
+      return jsonOut({ status: 'ok', todayCount, monthCount });
+    }
+
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    let sheet = ss.getSheetByName(SHEET_NAME);
+    if (!sheet) {
+      sheet = ss.insertSheet(SHEET_NAME);
+      sheet.appendRow([
+        'Timestamp','GPS Lat','GPS Lng',
+        'Executive Name','Accompanied By','Visit Date','Visit Number',
+        'Client Type','Client Status','Recruiter ID','Company Name','City','Locality',
+        'Hiring Categories','Contact Name','Designation','Mobile','Email',
+        'Is Decision Maker','DM Name','DM Designation',
+        'Monthly Hiring Req','Meeting Type','Quotation Amount (₹)','Proposal Shared','MoM / Notes',
+        'Outcome','Converted Amount (₹)','Follow Up Date',
+        'Photo 1','Photo 2'
+      ]);
+      sheet.setFrozenRows(1);
+    }
+    const photo1 = (d.photos && d.photos[0]) ? d.photos[0] : '';
+    const photo2 = (d.photos && d.photos[1]) ? d.photos[1] : '';
+    sheet.appendRow([
+      d.timestamp, d.gpsLat, d.gpsLng,
+      d.execName, d.accompaniedBy, d.visitDate, d.visitNumber,
+      d.clientType, d.clientStatus, d.recruiterId, d.clientCompany, d.city, d.locality,
+      d.hiringCategories, d.contactName, d.contactDesig, d.contactMobile, d.contactEmail,
+      d.isDecisionMaker, d.dmName, d.dmDesig,
+      d.hiringReq, d.meetingType, d.quotationAmount, d.proposalShared, d.mom,
+      d.outcome, d.convertedAmount, d.followUpDate,
+      photo1, photo2
+    ]);
+    return jsonOut({ status: 'ok' });
+  } catch(err) {
+    return jsonOut({ status: 'error', message: err.toString() });
+  }
+}
+
+
+════════════════════════════════════════════════════════
+
+════════════════════════════════════════════════════════
+-->
+</body>
+</html>
